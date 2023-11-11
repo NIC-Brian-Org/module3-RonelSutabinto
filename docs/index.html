@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=\, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link 
-      rel="stylesheet" 
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""/>
-    <script 
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-      crossorigin="">
-    </script>
-    <style>
-      #issMap {
-        height: 360px;
-      }
-    </style>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Journey Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <label for="locationInput">Enter Location:</label>
+    <input type="text" id="locationInput" />
+    <label for="modeSelect">Select Mode of Travel:</label>
+    <select id="modeSelect">
+      <option value="foot">Walk</option>
+      <option value="bike">Bike</option>
+      <option value="car">Car</option>
+      <option value="bus">Bus</option>
+      <option value="train">Train</option>
+      <option value="plane">Airplane</option>
+      <option value="ferry">Ferry</option>
+    </select>
+    <button onclick="searchLocation()">Search</button>
+  </div>
+  
+  <div id="map"></div>
 
-    <title>Fetch JSON from API and map lat lon</title>
-  </head>
-  <body>
-    <h1>Where is the ISS?</h1>
-
-    <p>
-      latitude: <span id="lat"></span>°<br />
-      longitude: <span id="lon"></span>° <br />
-    </p>
-
-    <div id="issMap"></div>
-
-    <script src="app.js"></script>
-  </body>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="main.js"></script>
+</body>
 </html>

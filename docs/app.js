@@ -1,41 +1,83 @@
 'use strict';
 
-(() => {
-  window.addEventListener('load', (event) => {
-    // Making a map and tiles
-    // Setting a higher initial zoom to make effect more obvious
-    const mymap = L.map('issMap').setView([0, 0], 6);
-    const attribution =
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const apiKey = '3ed5f652c99343e3860d87eb026f79fb';
 
-    const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    const tiles = L.tileLayer(tileUrl, {attribution});
-    tiles.addTo(mymap);
+let map;
+let markers = [];
+let mode;
 
-    // Making a marker with a custom icon
-    const issIcon = L.icon({
-      iconUrl: 'iss200.png',
-      iconSize: [50, 32],
-      iconAnchor: [25, 16],
-    });
-    const marker = L.marker([0, 0], {icon: issIcon}).addTo(mymap);
+function initMap() {
+  // Initialize the map
+  map = L.map('map').setView([0, 0], 2);
+  L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`, {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.geoapify.com/">Geoapify</a>'
+  }).addTo(map);
+}
 
-    const apiUrl = 'https://api.wheretheiss.at/v1/satellites/25544';
+function searchLocation() {
+  // Clear existing markers and routes
+  clearMarkers();
 
-    async function getISS() {
-      const response = await fetch(apiUrl);
-      const data = await response.json();
-      const {latitude, longitude} = data;
+  const locationInput = document.getElementById('locationInput').value;
+  mode = document.getElementById('modeSelect').value;
 
-      // Always set the view to current lat lon and zoom!
-      mymap.setView([latitude, longitude], mymap.getZoom());
-      marker.setLatLng([latitude, longitude]);
+  // Make API request to Geoapify to get location details
+  $.get(`https://api.geoapify.com/v1/geocode/search?text=${locationInput}&apiKey=${apiKey}`, function(data) {
+    console.log('Geoapify API response:', data);
 
-      document.getElementById('lat').textContent = latitude.toFixed(2);
-      document.getElementById('lon').textContent = longitude.toFixed(2);
+    if (data && data.features && data.features.length > 0) {
+      const coordinates = data.features[0].geometry.coordinates;
+      const name = data.features[0].properties.formatted;
+
+      // Add marker for the selected location
+      const marker = L.marker(coordinates.reverse()).addTo(map); // Reverse the coordinates
+      marker.bindPopup(`<b>${name}</b>`).openPopup();
+
+      // Center the map on the selected location
+      map.setView(coordinates, 10);
+
+      markers.push(marker);
+
+      // Get suggested routes
+      getDirections(coordinates);
+    } else {
+      alert('Location not found. Please try again.');
     }
-
-    getISS();
-    setInterval(getISS, 1000);
   });
-})();
+}
+
+function getDirections(destination) {
+
+  // Make API request to Geoapify Directions API to get suggested routes
+  $.get(`https://api.geoapify.com/v1/routing?apiKey=${apiKey}&start=${markers[0].getLatLng().lat},${markers[0].getLatLng().lng}&end=${destination[1]},${destination[0]}&mode=${mode}`, function(data) {
+    console.log('Geoapify Directions API response:', data);
+
+    if (data && data.features && data.features.length > 0) {
+      // Display suggested routes on the map
+      data.features.forEach(route => {
+        const coordinates = route.geometry.coordinates;
+        const polyline = L.polyline(coordinates, { color: 'blue' }).addTo(map);
+        markers.push(polyline);
+      });
+    } else {
+      alert('No routes found for the selected mode of travel.');
+    }
+  });
+}
+
+function clearMarkers() {
+  // Remove existing markers from the map
+  markers.forEach(marker => {
+    marker.remove();
+  });
+
+  // Clear the markers array
+  markers = [];
+}
+
+// Initialize the map when the page loads
+document.addEventListener('DOMContentLoaded', initMap);
+
+
+
+
