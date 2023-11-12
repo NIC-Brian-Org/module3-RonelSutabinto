@@ -3,36 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css">
     <title>Journey Map</title>
 </head>
 <body style="border: 0; margin: 0">
 
+<!-- Bootstrap container for layout -->
 <div class="container-fluid">
     <div class="row">
-        
+        <!-- Form block column -->
         <div class="col-12 formBlock">
             <form id="form">
+                <!-- Input field for starting point -->
                 <div class="form-group">
                     <input type="text" name="start" class="form-control input" id="start" placeholder="Choose starting point">
                 </div>
+                <!-- Input field for destination -->
                 <div class="form-group">
                     <input type="text" name="end" class="form-control input" id="destination" placeholder="Choose destination">
                 </div>
+                <!-- Button to trigger route calculation -->
                 <button type="button" class="btn btn-primary" id="getDirectionsBtn">Get Directions</button>
             </form>
         </div>
+        <!-- Map column -->
         <div class="col-12" id="map" style="height: 500px;"></div>
     </div>
 </div>
 
+<!-- JavaScript dependencies -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<!-- Leaflet and MapQuest JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
-<script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-map.js?key=S8d7L47mdyAG5nHG09dUnSPJjreUVPeC"></script>
-<script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-routing.js?key=S8d7L47mdyAG5nHG09dUnSPJjreUVPeC"></script>
+<script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-map.js?key=oyEkrzJ7VYbhShrYt71QRV8NXYZOQjnu"></script>
+<script src="https://www.mapquestapi.com/sdk/leaflet/v2.2/mq-routing.js?key=oyEkrzJ7VYbhShrYt71QRV8NXYZOQjnu"></script>
+<!-- Your custom JavaScript file -->
 <script src="app.js"></script>
 </body>
 </html>
