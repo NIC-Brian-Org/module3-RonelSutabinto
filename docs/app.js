@@ -90,10 +90,6 @@ function getDirectionsAndEstimateDuration(start, end, mode, estimatedDurationsCo
           // Append the estimated time duration to the content variable
           estimatedDurationsContent += `Estimated time duration for ${mode}: ${formattedTime}<br>`;
 
-          // If all three modes are fetched, update the content of the estimated durations element
-          // if (mode === 'walking') {
-          //     updateEstimatedDurations(estimatedDurationsContent);
-          // }
 
           updateEstimatedDurations(estimatedDurationsContent);
       })
@@ -118,9 +114,9 @@ function getDirections() {
     let estimatedDurationsContent = "";
 
     // Estimate time duration for car, bicycle, and walk modes
-    getDirectionsAndEstimateDuration(start, end, 'car', estimatedDurationsContent);
+    getDirectionsAndEstimateDuration(start, end, 'fastest', estimatedDurationsContent);
     getDirectionsAndEstimateDuration(start, end, 'bicycle', estimatedDurationsContent);
-    getDirectionsAndEstimateDuration(start, end, 'walking', estimatedDurationsContent);
+    getDirectionsAndEstimateDuration(start, end, 'pedestrian', estimatedDurationsContent);
 
 
     // reset form
