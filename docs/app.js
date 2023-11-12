@@ -1,83 +1,101 @@
 'use strict';
 
-const apiKey = '3ed5f652c99343e3860d87eb026f79fb';
+let start, end; // Declare start and end variables at the beginning
 
-let map;
-let markers = [];
-let mode;
+let CustomRouteLayer; // Declare CustomRouteLayer in a higher scope
 
-function initMap() {
-  // Initialize the map
-  map = L.map('map').setView([0, 0], 2);
-  L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${apiKey}`, {
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.geoapify.com/">Geoapify</a>'
-  }).addTo(map);
-}
+// default map layer
+let map = L.map('map', {
+  layers: MQ.mapLayer(),
+  center: [49.6942, -124.9990], // Courtenay coordinates
+  zoom: 12 // Adjust the zoom level as needed
+});
 
-function searchLocation() {
-  // Clear existing markers and routes
-  clearMarkers();
+// Function to get the current location and convert it to an address
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
 
-  const locationInput = document.getElementById('locationInput').value;
-  mode = document.getElementById('modeSelect').value;
+            // Use MapQuest Geocoding API to convert coordinates to address
+            const geocodingApiUrl = `https://www.mapquestapi.com/geocoding/v1/reverse?key=S8d7L47mdyAG5nHG09dUnSPJjreUVPeC&location=${latitude},${longitude}&includeRoadMetadata=true&includeNearestIntersection=true`;
 
-  // Make API request to Geoapify to get location details
-  $.get(`https://api.geoapify.com/v1/geocode/search?text=${locationInput}&apiKey=${apiKey}`, function(data) {
-    console.log('Geoapify API response:', data);
-
-    if (data && data.features && data.features.length > 0) {
-      const coordinates = data.features[0].geometry.coordinates;
-      const name = data.features[0].properties.formatted;
-
-      // Add marker for the selected location
-      const marker = L.marker(coordinates.reverse()).addTo(map); // Reverse the coordinates
-      marker.bindPopup(`<b>${name}</b>`).openPopup();
-
-      // Center the map on the selected location
-      map.setView(coordinates, 10);
-
-      markers.push(marker);
-
-      // Get suggested routes
-      getDirections(coordinates);
+            // Fetch the address using the Geocoding API
+            fetch(geocodingApiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const address = data.results[0].locations[0].street;
+                    // Set the starting point field with the current address
+                    document.getElementById('start').value = address;
+                })
+                .catch(error => {
+                    console.error('Error fetching address:', error);
+                });
+        }, function (error) {
+            console.error('Error getting current location:', error.message);
+        });
     } else {
-      alert('Location not found. Please try again.');
+        console.error('Geolocation is not supported by this browser.');
     }
-  });
 }
 
-function getDirections(destination) {
+function runDirection(start, end) {
+    // recreating new map layer after removal
+    map = L.map('map', {
+        layers: MQ.mapLayer(),
+        center: [35.791188, -78.636755],
+        zoom: 12
+    });
 
-  // Make API request to Geoapify Directions API to get suggested routes
-  $.get(`https://api.geoapify.com/v1/routing?apiKey=${apiKey}&start=${markers[0].getLatLng().lat},${markers[0].getLatLng().lng}&end=${destination[1]},${destination[0]}&mode=${mode}`, function(data) {
-    console.log('Geoapify Directions API response:', data);
+    var dir = MQ.routing.directions();
 
-    if (data && data.features && data.features.length > 0) {
-      // Display suggested routes on the map
-      data.features.forEach(route => {
-        const coordinates = route.geometry.coordinates;
-        const polyline = L.polyline(coordinates, { color: 'blue' }).addTo(map);
-        markers.push(polyline);
-      });
-    } else {
-      alert('No routes found for the selected mode of travel.');
-    }
-  });
+    dir.route({
+        locations: [
+            start,
+            end
+        ]
+    });
+
+    CustomRouteLayer = MQ.Routing.RouteLayer.extend({
+        createStartMarker: (location) => {
+            var marker = L.marker(location.latLng).addTo(map);
+            return marker;
+        },
+
+        createEndMarker: (location) => {
+            var marker = L.marker(location.latLng).addTo(map);
+            return marker;
+        }
+    });
+
+    map.addLayer(new CustomRouteLayer({
+        directions: dir,
+        fitBounds: true
+    }));
 }
 
-function clearMarkers() {
-  // Remove existing markers from the map
-  markers.forEach(marker => {
-    marker.remove();
-  });
+// function that runs when button clicked
+function getDirections() {
+    // delete current map layer
+    map.remove();
 
-  // Clear the markers array
-  markers = [];
+    // getting form data
+    start = document.getElementById("start").value;
+    end = document.getElementById("destination").value;
+
+    // run directions function
+    runDirection(start, end);
+
+    // reset form
+    document.getElementById("form").reset();
 }
 
-// Initialize the map when the page loads
-document.addEventListener('DOMContentLoaded', initMap);
+// assign the button to button variable
+const getDirectionsBtn = document.getElementById('getDirectionsBtn');
 
+// call the getDirections() function when button is clicked
+getDirectionsBtn.addEventListener('click', getDirections);
 
-
-
+// call getCurrentLocation() when the page loads
+getCurrentLocation();
