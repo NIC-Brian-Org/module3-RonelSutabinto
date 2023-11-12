@@ -75,6 +75,33 @@ function runDirection(start, end) {
     }));
 }
 
+
+// Function to get directions and estimate time duration
+function getDirectionsAndEstimateDuration(start, end, mode, estimatedDurationsContent) {
+  const directionsApiUrl = `https://www.mapquestapi.com/directions/v2/route?key=S8d7L47mdyAG5nHG09dUnSPJjreUVPeC&from=${start}&to=${end}&routeType=${mode}&unit=k`;
+
+  // Fetch the directions and estimated time duration using the Directions API
+  fetch(directionsApiUrl)
+      .then(response => response.json())
+      .then(data => {
+          const route = data.route;
+          const formattedTime = route.formattedTime;
+
+          // Append the estimated time duration to the content variable
+          estimatedDurationsContent += `Estimated time duration for ${mode}: ${formattedTime}<br>`;
+
+          // If all three modes are fetched, update the content of the estimated durations element
+          // if (mode === 'walking') {
+          //     updateEstimatedDurations(estimatedDurationsContent);
+          // }
+
+          updateEstimatedDurations(estimatedDurationsContent);
+      })
+      .catch(error => {
+          console.error('Error fetching directions:', error);
+      });
+}
+
 // function that runs when button clicked
 function getDirections() {
     // delete current map layer
@@ -87,8 +114,22 @@ function getDirections() {
     // run directions function
     runDirection(start, end);
 
+    // Initialize content variable
+    let estimatedDurationsContent = "";
+
+    // Estimate time duration for car, bicycle, and walk modes
+    getDirectionsAndEstimateDuration(start, end, 'car', estimatedDurationsContent);
+    getDirectionsAndEstimateDuration(start, end, 'bicycle', estimatedDurationsContent);
+    getDirectionsAndEstimateDuration(start, end, 'walking', estimatedDurationsContent);
+
+
     // reset form
     document.getElementById("form").reset();
+}
+
+// Function to update the content of the estimated durations element
+function updateEstimatedDurations(content) {
+  document.getElementById("estimatedDurations").innerHTML += content;
 }
 
 // assign the button to button variable
